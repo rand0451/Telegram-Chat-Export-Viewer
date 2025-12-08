@@ -16,6 +16,19 @@
         return; // Exit if not a Telegram export
     }
 
+    // Allow disabling via URL param (?enhancer=off) or localStorage flag
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const disabledParam = params.get('enhancer');
+        const disabledStore = localStorage.getItem('telegram-enhancer-disabled');
+        if ((disabledParam && disabledParam.toLowerCase() === 'off') || disabledStore === 'true') {
+            console.log('[Telegram Enhancer] Disabled (param/store)');
+            return;
+        }
+    } catch(e) {
+        console.warn('[Telegram Enhancer] Disable check failed', e);
+    }
+
     // Theme definitions
     const themes = {
         light: {
@@ -111,7 +124,35 @@
             favoriteRemoved: '⭐ Removed from favorites',
             readingMode: '📖 Reading mode',
             resetFont: '↺ Reset font size',
-            fontReset: 'Font size reset to default'
+            fontReset: 'Font size reset to default',
+            focusMode: '🎯 Focus on message',
+            exitFocus: 'Click anywhere to exit',
+            focusActive: '🎯 Focus mode active',
+            jumpToDate: '📅 Jump to date',
+            searchByUser: '👤 Filter by user',
+            bookmark: '🔖 Bookmark',
+            bookmarks: '🔖 Bookmarks',
+            removeBookmark: '🔖 Remove bookmark',
+            bookmarkAdded: '🔖 Bookmarked',
+            bookmarkRemoved: '🔖 Bookmark removed',
+            noBookmarks: 'No bookmarks yet',
+            progress: '📊 Reading progress',
+            continueReading: '▶️ Continue reading',
+            messageCount: 'messages',
+            scrollProgress: 'Scroll',
+            filterMessages: '🔍 Filter messages',
+            quickActions: 'Quick actions',
+            jumpTo: '🔢 Jump to #',
+            jumpToMessage: 'Jump to message',
+            jumpPlaceholder: 'Enter message number...',
+            jumpGo: 'Go',
+            cancel: 'Cancel',
+            messageNotFound: 'Message not found',
+            messageInfo: 'ℹ️ Message Info',
+            wordCount: 'Words',
+            charCount: 'Characters',
+            hasMedia: 'Has media',
+            timestamp: 'Timestamp'
         },
         ru: {
             search: 'Поиск в чате...',
@@ -168,7 +209,35 @@
             favoriteRemoved: '⭐ Удалено из избранного',
             readingMode: '📖 Режим чтения',
             resetFont: '↺ Сбросить размер шрифта',
-            fontReset: 'Размер шрифта сброшен'
+            fontReset: 'Размер шрифта сброшен',
+            focusMode: '🎯 Фокус на сообщении',
+            exitFocus: 'Нажмите в любом месте для выхода',
+            focusActive: '🎯 Режим фокусировки активен',
+            jumpToDate: '📅 Перейти к дате',
+            searchByUser: '👤 Фильтр по пользователю',
+            bookmark: '🔖 Закладка',
+            bookmarks: '🔖 Закладки',
+            removeBookmark: '🔖 Удалить закладку',
+            bookmarkAdded: '🔖 Добавлено в закладки',
+            bookmarkRemoved: '🔖 Закладка удалена',
+            noBookmarks: 'Пока нет закладок',
+            progress: '📊 Прогресс чтения',
+            continueReading: '▶️ Продолжить чтение',
+            messageCount: 'сообщений',
+            scrollProgress: 'Прокрутка',
+            filterMessages: '🔍 Фильтр сообщений',
+            quickActions: 'Быстрые действия',
+            jumpTo: '🔢 Перейти к #',
+            jumpToMessage: 'Перейти к сообщению',
+            jumpPlaceholder: 'Введите номер сообщения...',
+            jumpGo: 'Перейти',
+            cancel: 'Отмена',
+            messageNotFound: 'Сообщение не найдено',
+            messageInfo: 'ℹ️ Инфо о сообщении',
+            wordCount: 'Слов',
+            charCount: 'Символов',
+            hasMedia: 'Есть медиа',
+            timestamp: 'Время'
         },
         ua: {
             search: 'Пошук у чаті...',
@@ -225,7 +294,35 @@
             favoriteRemoved: '⭐ Видалено з обраного',
             readingMode: '📖 Режим читання',
             resetFont: '↺ Скинути розмір шрифту',
-            fontReset: 'Розмір шрифту скинуто'
+            fontReset: 'Розмір шрифту скинуто',
+            focusMode: '🎯 Фокус на повідомленні',
+            exitFocus: 'Натисніть будь-де для виходу',
+            focusActive: '🎯 Режим фокусування активний',
+            jumpToDate: '📅 Перейти до дати',
+            searchByUser: '👤 Фільтр по користувачу',
+            bookmark: '🔖 Закладка',
+            bookmarks: '🔖 Закладки',
+            removeBookmark: '🔖 Видалити закладку',
+            bookmarkAdded: '🔖 Додано до закладок',
+            bookmarkRemoved: '🔖 Закладку видалено',
+            noBookmarks: 'Поки немає закладок',
+            progress: '📊 Прогрес читання',
+            continueReading: '▶️ Продовжити читання',
+            messageCount: 'повідомлень',
+            scrollProgress: 'Прокрутка',
+            filterMessages: '🔍 Фільтр повідомлень',
+            quickActions: 'Швидкі дії',
+            jumpTo: '🔢 Перейти до #',
+            jumpToMessage: 'Перейти до повідомлення',
+            jumpPlaceholder: 'Введіть номер повідомлення...',
+            jumpGo: 'Перейти',
+            cancel: 'Скасувати',
+            messageNotFound: 'Повідомлення не знайдено',
+            messageInfo: 'ℹ️ Інфо про повідомлення',
+            wordCount: 'Слів',
+            charCount: 'Символів',
+            hasMedia: 'Є медіа',
+            timestamp: 'Час'
         }
     };
 
@@ -471,6 +568,12 @@
         menu.id = 'context-menu';
         menu.innerHTML = `
             <div class="context-item" data-action="copy">${t('copyText')}</div>
+            <div class="context-item" data-action="focus">${t('focusMode')}</div>
+            <div class="context-separator"></div>
+            <div class="context-item" data-action="bookmark">${t('bookmark')}</div>
+            <div class="context-item" data-action="favorite">${t('favorite')}</div>
+            <div class="context-separator"></div>
+            <div class="context-item" data-action="info">${t('messageInfo')}</div>
             <div class="context-item" data-action="select">${t('select')}</div>
             <div class="context-item" data-action="link">${t('copyLink')}</div>
         `;
@@ -514,6 +617,18 @@
                 navigator.clipboard.writeText(text).then(() => {
                     showToast(t('textCopied'));
                 });
+                break;
+            case 'focus':
+                enableFocusMode(message);
+                break;
+            case 'bookmark':
+                toggleBookmark(message);
+                break;
+            case 'favorite':
+                toggleFavorite(message);
+                break;
+            case 'info':
+                showMessageInfo(message);
                 break;
             case 'link':
                 const id = message.id;
@@ -1213,41 +1328,299 @@
         #context-menu {
             position: absolute;
             background: var(--bgMessage);
-            border-radius: 8px;
-            box-shadow: 0 4px 16px var(--shadow);
-            padding: 4px 0;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--border);
+            padding: 6px;
             z-index: 10001;
             opacity: 0;
             pointer-events: none;
-            transform: scale(0.95);
-            transition: opacity 0.2s ease, transform 0.2s ease;
+            transform: scale(0.92) translateY(-8px);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 200px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         #context-menu.visible {
             opacity: 1;
             pointer-events: all;
-            transform: scale(1);
+            transform: scale(1) translateY(0);
         }
 
         .context-item {
-            padding: 10px 16px;
+            padding: 10px 14px;
             cursor: pointer;
             color: var(--text);
             font-size: 14px;
-            transition: background 0.1s ease;
+            font-weight: 500;
+            transition: all 0.15s ease;
             white-space: nowrap;
+            border-radius: 8px;
+            margin: 2px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .context-item:hover {
             background: var(--bgHover);
+            transform: translateX(2px);
         }
 
-        .context-item:first-child {
-            border-radius: 8px 8px 0 0;
+        .context-item:active {
+            transform: scale(0.98);
         }
 
-        .context-item:last-child {
-            border-radius: 0 0 8px 8px;
+        .context-separator {
+            height: 1px;
+            background: var(--border);
+            margin: 6px 8px;
+        }
+
+        /* Quick actions toolbar */
+        #quick-actions {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            transform: translateY(100px);
+            background: var(--bgMessage);
+            border-radius: 12px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+            z-index: 4000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        #quick-actions.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .quick-action-btn {
+            padding: 8px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            width: 36px;
+            height: 36px;
+        }
+
+        .quick-action-btn:hover {
+            background: var(--bgHover);
+            transform: scale(1.1);
+        }
+
+        .quick-action-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Jump to message modal */
+        #jump-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        #jump-modal.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .jump-content {
+            background: var(--bgMessage);
+            border-radius: 16px;
+            padding: 24px;
+            min-width: 320px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        #jump-modal.visible .jump-content {
+            transform: scale(1);
+        }
+
+        .jump-content h3 {
+            margin: 0 0 16px 0;
+            color: var(--text);
+            font-size: 18px;
+        }
+
+        .jump-content input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border 0.2s ease;
+        }
+
+        .jump-content input:focus {
+            border-color: var(--textLink);
+        }
+
+        .jump-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .jump-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .jump-go {
+            background: var(--textLink);
+            color: white;
+        }
+
+        .jump-go:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .jump-cancel {
+            background: var(--bgHover);
+            color: var(--text);
+        }
+
+        .jump-cancel:hover {
+            background: var(--border);
+        }
+
+        /* Message info modal */
+        #message-info-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        #message-info-modal.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .message-info-content {
+            background: var(--bgMessage);
+            border-radius: 20px;
+            padding: 28px;
+            min-width: 380px;
+            max-width: 500px;
+            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #message-info-modal.visible .message-info-content {
+            transform: scale(1);
+        }
+
+        .message-info-content h3 {
+            margin: 0 0 20px 0;
+            color: var(--text);
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--textSecondary);
+        }
+
+        .info-value {
+            font-weight: 500;
+        }
+
+        .info-close-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background: var(--textLink);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .info-close-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        /* Improved message hover effect */
+        .message.default:hover {
+            background: var(--bgHover);
+            transform: translateX(4px);
+        }
+
+        /* Smooth animations for all interactive elements */
+        .message.default,
+        .context-item,
+        .quick-action-btn,
+        button {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Selection counter */
@@ -1925,6 +2298,416 @@
             }
         }
         
+        /* iOS-style Focus Mode with Blur Background */
+        .focus-mode-active {
+            position: relative;
+        }
+
+        .focus-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(10px) saturate(160%);
+            -webkit-backdrop-filter: blur(10px) saturate(160%);
+            z-index: 5000;
+            opacity: 0;
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: all;
+        }
+
+        .focus-overlay.visible {
+            opacity: 1;
+        }
+
+        /* Wrapper for focused message to isolate it from blur */
+        .message-focused {
+            position: relative !important;
+            z-index: 5001 !important;
+            transform: scale(1.08) translateZ(0) !important;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.9), 
+                        0 0 0 5px var(--textLink),
+                        0 0 40px rgba(52, 144, 236, 0.8) !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            animation: focusPulse 3s ease-in-out infinite !important;
+            border-radius: 16px !important;
+            background: #ffffff !important;
+            filter: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            will-change: transform, box-shadow;
+            isolation: isolate;
+        }
+
+        /* Dark theme focused message */
+        [data-theme="dark"] .message-focused {
+            background: #1e1e1e !important;
+        }
+
+        /* Ensure all text and content is visible */
+        .message-focused,
+        .message-focused *,
+        .message-focused .text,
+        .message-focused .from_name,
+        .message-focused .body {
+            color: #000000 !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        [data-theme="dark"] .message-focused,
+        [data-theme="dark"] .message-focused *,
+        [data-theme="dark"] .message-focused .text,
+        [data-theme="dark"] .message-focused .from_name,
+        [data-theme="dark"] .message-focused .body {
+            color: #e4e4e7 !important;
+        }
+
+        @keyframes focusPulse {
+            0%, 100% {
+                box-shadow: 0 20px 80px rgba(0, 0, 0, 0.9), 
+                            0 0 0 5px var(--textLink),
+                            0 0 40px rgba(52, 144, 236, 0.8);
+            }
+            50% {
+                box-shadow: 0 24px 96px rgba(0, 0, 0, 1), 
+                            0 0 0 6px var(--textLink),
+                            0 0 50px rgba(52, 144, 236, 1);
+            }
+        }
+
+        .focus-hint {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .focus-hint.visible {
+            opacity: 1;
+        }
+
+        /* Action buttons for focused message */
+        .focus-actions {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-top: 16px;
+            transform: translateX(-50%) scale(0.9);
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 1);
+            padding: 12px 18px;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            z-index: 5002;
+        }
+
+        .message-focused .focus-actions {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+            pointer-events: all;
+        }
+
+        .focus-actions button {
+            background: transparent;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .focus-actions button:hover {
+            background: rgba(0, 0, 0, 0.08);
+            transform: scale(1.05);
+        }
+
+        .focus-actions button:active {
+            transform: scale(0.95);
+        }
+
+        /* Dark theme adjustments for focus mode */
+        [data-theme="dark"] .focus-overlay {
+            background: rgba(0, 0, 0, 0.92);
+        }
+
+        [data-theme="dark"] .focus-actions {
+            background: rgba(30, 30, 30, 1);
+        }
+
+        [data-theme="dark"] .focus-actions button {
+            color: #e4e4e7;
+        }
+
+        [data-theme="dark"] .focus-actions button:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Bookmarks panel */
+        #bookmarks-panel {
+            position: fixed;
+            top: 80px;
+            right: -320px;
+            width: 300px;
+            max-height: calc(100vh - 100px);
+            background: var(--bgMessage);
+            border-radius: 16px 0 0 16px;
+            box-shadow: -4px 0 20px var(--shadow);
+            padding: 20px;
+            z-index: 4000;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+
+        #bookmarks-panel.visible {
+            right: 0;
+        }
+
+        #bookmarks-panel h3 {
+            margin: 0 0 16px 0;
+            color: var(--text);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bookmark-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: var(--bg);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid var(--textLink);
+        }
+
+        .bookmark-item:hover {
+            background: var(--bgHover);
+            transform: translateX(-4px);
+        }
+
+        .bookmark-item .bookmark-text {
+            font-size: 13px;
+            color: var(--text);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .bookmark-item .bookmark-meta {
+            font-size: 11px;
+            color: var(--textSecondary);
+            margin-top: 6px;
+        }
+
+        .bookmark-item .bookmark-remove {
+            float: right;
+            color: var(--textSecondary);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .bookmark-item .bookmark-remove:hover {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff4444;
+        }
+
+        /* Reading progress indicator */
+        #reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            pointer-events: none;
+        }
+
+        #reading-progress .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--textLink), #5ac8fa);
+            width: 0%;
+            transition: width 0.1s ease;
+            box-shadow: 0 0 10px rgba(52, 144, 236, 0.5);
+        }
+
+        /* Reading position button */
+        #reading-position {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: var(--textLink);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 4001;
+            box-shadow: 0 4px 16px rgba(52, 144, 236, 0.4);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        #reading-position.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        #reading-position:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 24px rgba(52, 144, 236, 0.6);
+        }
+
+        /* User filter dropdown */
+        #user-filter {
+            position: fixed;
+            top: 140px;
+            left: 20px;
+            background: var(--bgMessage);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+            z-index: 4000;
+            max-width: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        #user-filter.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        #user-filter h4 {
+            margin: 0 0 12px 0;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .user-filter-item {
+            padding: 10px;
+            margin: 4px 0;
+            background: var(--bg);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-filter-item:hover {
+            background: var(--bgHover);
+        }
+
+        .user-filter-item.active {
+            background: var(--textLink);
+            color: white;
+        }
+
+        .user-filter-count {
+            margin-left: auto;
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        /* Bookmark indicator on messages */
+        .message.bookmarked {
+            position: relative;
+        }
+
+        .message.bookmarked::before {
+            content: '🔖';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 16px;
+            opacity: 0.7;
+            z-index: 10;
+        }
+
+        /* Scroll timeline */
+        #scroll-timeline {
+            position: fixed;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 40%;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 2px;
+            z-index: 3000;
+            opacity: 0;
+            transition: opacity 0.3s ease, width 0.2s ease;
+        }
+
+        #scroll-timeline:hover {
+            width: 8px;
+            opacity: 1 !important;
+        }
+
+        #scroll-timeline .timeline-thumb {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            background: var(--textLink);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #scroll-timeline .timeline-thumb:hover {
+            background: #2c7ac4;
+            width: 12px;
+            left: -4px;
+        }
+
+        body.scrolling #scroll-timeline {
+            opacity: 0.6;
+        }
+
         @keyframes ripple {
             0% {
                 transform: scale(0);
@@ -2292,6 +3075,446 @@
     }
 
     // Initialize enhancements
+    // Bookmarks system
+    let bookmarks = JSON.parse(localStorage.getItem('telegram-bookmarks') || '[]');
+
+    function createBookmarksPanel() {
+        const panel = document.createElement('div');
+        panel.id = 'bookmarks-panel';
+        panel.innerHTML = `
+            <h3>🔖 ${t('bookmarks')}</h3>
+            <div id="bookmarks-list"></div>
+        `;
+        document.body.appendChild(panel);
+        updateBookmarksList();
+    }
+
+    function toggleBookmark(message) {
+        const messageId = message.id || Array.from(document.querySelectorAll('.message.default')).indexOf(message);
+        const text = message.querySelector('.text')?.innerText || '';
+        const from = message.querySelector('.from_name')?.innerText || 'Unknown';
+        const date = message.querySelector('.date')?.getAttribute('title') || '';
+        
+        const bookmarkIndex = bookmarks.findIndex(b => b.id === messageId);
+        
+        if (bookmarkIndex > -1) {
+            bookmarks.splice(bookmarkIndex, 1);
+            message.classList.remove('bookmarked');
+            showToast(t('bookmarkRemoved'));
+        } else {
+            bookmarks.push({ id: messageId, text: text.substring(0, 100), from, date });
+            message.classList.add('bookmarked');
+            showToast(t('bookmarkAdded'));
+        }
+        
+        localStorage.setItem('telegram-bookmarks', JSON.stringify(bookmarks));
+        updateBookmarksList();
+    }
+
+    function updateBookmarksList() {
+        const list = document.getElementById('bookmarks-list');
+        if (!list) return;
+        
+        if (bookmarks.length === 0) {
+            list.innerHTML = `<p style="color: var(--textSecondary); font-size: 13px; text-align: center; padding: 20px;">${t('noBookmarks')}</p>`;
+            return;
+        }
+        
+        list.innerHTML = bookmarks.map((bookmark, index) => `
+            <div class="bookmark-item" data-id="${bookmark.id}">
+                <span class="bookmark-remove" data-index="${index}">×</span>
+                <div class="bookmark-text">${bookmark.text}</div>
+                <div class="bookmark-meta">${bookmark.from} • ${bookmark.date}</div>
+            </div>
+        `).join('');
+        
+        list.querySelectorAll('.bookmark-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (e.target.classList.contains('bookmark-remove')) {
+                    const index = parseInt(e.target.dataset.index);
+                    bookmarks.splice(index, 1);
+                    localStorage.setItem('telegram-bookmarks', JSON.stringify(bookmarks));
+                    updateBookmarksList();
+                    const messages = Array.from(document.querySelectorAll('.message.default'));
+                    messages.forEach(m => m.classList.remove('bookmarked'));
+                    bookmarks.forEach(b => {
+                        if (messages[b.id]) messages[b.id].classList.add('bookmarked');
+                    });
+                    showToast(t('bookmarkRemoved'));
+                } else {
+                    const messageId = item.dataset.id;
+                    const messages = Array.from(document.querySelectorAll('.message.default'));
+                    const targetMessage = messages[messageId];
+                    if (targetMessage) {
+                        targetMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        targetMessage.classList.add('selected');
+                        setTimeout(() => targetMessage.classList.remove('selected'), 2000);
+                    }
+                    document.getElementById('bookmarks-panel').classList.remove('visible');
+                }
+            });
+        });
+    }
+
+    function loadBookmarks() {
+        const messages = Array.from(document.querySelectorAll('.message.default'));
+        bookmarks.forEach(bookmark => {
+            if (messages[bookmark.id]) {
+                messages[bookmark.id].classList.add('bookmarked');
+            }
+        });
+    }
+
+    // Reading progress tracker
+    function createReadingProgress() {
+        const progress = document.createElement('div');
+        progress.id = 'reading-progress';
+        progress.innerHTML = '<div class="progress-bar"></div>';
+        document.body.appendChild(progress);
+        
+        const progressBar = progress.querySelector('.progress-bar');
+        
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            progressBar.style.width = scrollPercent + '%';
+            
+            // Save reading position
+            localStorage.setItem('telegram-reading-pos', scrollTop);
+        });
+        
+        // Continue reading button
+        const savedPos = localStorage.getItem('telegram-reading-pos');
+        if (savedPos && parseFloat(savedPos) > 500) {
+            const btn = document.createElement('div');
+            btn.id = 'reading-position';
+            btn.innerHTML = '▶️';
+            btn.title = t('continueReading');
+            document.body.appendChild(btn);
+            
+            setTimeout(() => btn.classList.add('visible'), 1000);
+            
+            btn.addEventListener('click', () => {
+                window.scrollTo({ top: parseFloat(savedPos), behavior: 'smooth' });
+                btn.classList.remove('visible');
+                setTimeout(() => btn.remove(), 300);
+            });
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                btn.classList.remove('visible');
+                setTimeout(() => btn.remove(), 300);
+            }, 5000);
+        }
+    }
+
+    // User filter
+    function createUserFilter() {
+        const messages = document.querySelectorAll('.message.default');
+        const users = new Map();
+        
+        messages.forEach(msg => {
+            const from = msg.querySelector('.from_name')?.innerText;
+            if (from) {
+                users.set(from, (users.get(from) || 0) + 1);
+            }
+        });
+        
+        if (users.size === 0) return;
+        
+        const filter = document.createElement('div');
+        filter.id = 'user-filter';
+        filter.innerHTML = `
+            <h4>👤 ${t('searchByUser')}</h4>
+            <div class="user-filter-item" data-user="all">
+                ${t('all')} <span class="user-filter-count">${messages.length}</span>
+            </div>
+            ${Array.from(users.entries()).map(([user, count]) => `
+                <div class="user-filter-item" data-user="${user}">
+                    ${user} <span class="user-filter-count">${count}</span>
+                </div>
+            `).join('')}
+        `;
+        document.body.appendChild(filter);
+        
+        filter.querySelectorAll('.user-filter-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const user = item.dataset.user;
+                filter.querySelectorAll('.user-filter-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                if (user === 'all') {
+                    messages.forEach(msg => msg.style.display = '');
+                    showToast(`${t('shown')} ${messages.length} ${t('messageCount')}`);
+                } else {
+                    let count = 0;
+                    messages.forEach(msg => {
+                        const from = msg.querySelector('.from_name')?.innerText;
+                        if (from === user) {
+                            msg.style.display = '';
+                            count++;
+                        } else {
+                            msg.style.display = 'none';
+                        }
+                    });
+                    showToast(`${user}: ${count} ${t('messageCount')}`);
+                }
+                
+                filter.classList.remove('visible');
+            });
+        });
+    }
+
+    // Scroll timeline
+    function createScrollTimeline() {
+        const timeline = document.createElement('div');
+        timeline.id = 'scroll-timeline';
+        timeline.innerHTML = '<div class="timeline-thumb"></div>';
+        document.body.appendChild(timeline);
+        
+        const thumb = timeline.querySelector('.timeline-thumb');
+        let scrollTimeout;
+        
+        function updateThumb() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            const thumbHeight = (window.innerHeight / document.documentElement.scrollHeight) * 100;
+            
+            thumb.style.height = Math.max(thumbHeight, 5) + '%';
+            thumb.style.top = scrollPercent + '%';
+        }
+        
+        window.addEventListener('scroll', () => {
+            document.body.classList.add('scrolling');
+            updateThumb();
+            
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                document.body.classList.remove('scrolling');
+            }, 1000);
+        });
+        
+        timeline.addEventListener('click', (e) => {
+            const rect = timeline.getBoundingClientRect();
+            const clickY = e.clientY - rect.top;
+            const percent = clickY / rect.height;
+            const scrollTarget = percent * (document.documentElement.scrollHeight - window.innerHeight);
+            window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+        });
+        
+        updateThumb();
+    }
+
+    // Show message info
+    function showMessageInfo(message) {
+        const text = message.querySelector('.text')?.innerText || '';
+        const from = message.querySelector('.from_name')?.innerText || 'Unknown';
+        const date = message.querySelector('.date')?.getAttribute('title') || '';
+        const messageIndex = Array.from(document.querySelectorAll('.message.default')).indexOf(message) + 1;
+        
+        const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
+        const charCount = text.length;
+        const hasPhoto = message.querySelector('.photo') ? '✓' : '✗';
+        const hasVideo = message.querySelector('.video_file, .media_video') ? '✓' : '✗';
+        const hasVoice = message.querySelector('.media_voice_message') ? '✓' : '✗';
+        const hasLink = message.querySelector('a') ? '✓' : '✗';
+        
+        let modal = document.getElementById('message-info-modal');
+        
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'message-info-modal';
+            document.body.appendChild(modal);
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal || e.target.classList.contains('info-close-btn')) {
+                    modal.classList.remove('visible');
+                }
+            });
+        }
+        
+        modal.innerHTML = `
+            <div class="message-info-content">
+                <h3>ℹ️ ${t('messageInfo')}</h3>
+                <div class="info-row">
+                    <span class="info-label">#</span>
+                    <span class="info-value">${messageIndex}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">👤 ${currentLang === 'en' ? 'From' : currentLang === 'ru' ? 'От' : 'Від'}</span>
+                    <span class="info-value">${from}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">🕐 ${t('timestamp')}</span>
+                    <span class="info-value">${date}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">📝 ${t('wordCount')}</span>
+                    <span class="info-value">${wordCount}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">🔤 ${t('charCount')}</span>
+                    <span class="info-value">${charCount}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">📷 ${currentLang === 'en' ? 'Photo' : currentLang === 'ru' ? 'Фото' : 'Фото'}</span>
+                    <span class="info-value">${hasPhoto}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">🎥 ${currentLang === 'en' ? 'Video' : currentLang === 'ru' ? 'Видео' : 'Відео'}</span>
+                    <span class="info-value">${hasVideo}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">🎤 ${currentLang === 'en' ? 'Voice' : currentLang === 'ru' ? 'Голос' : 'Голос'}</span>
+                    <span class="info-value">${hasVoice}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">🔗 ${currentLang === 'en' ? 'Link' : currentLang === 'ru' ? 'Ссылка' : 'Посилання'}</span>
+                    <span class="info-value">${hasLink}</span>
+                </div>
+                <button class="info-close-btn">${t('close')}</button>
+            </div>
+        `;
+        
+        modal.classList.add('visible');
+    }
+
+    // Quick actions toolbar
+    function createQuickActions() {
+        const toolbar = document.createElement('div');
+        toolbar.id = 'quick-actions';
+        toolbar.innerHTML = `
+            <button class="quick-action-btn" data-action="jump" title="${t('jumpTo')}">
+                🔢
+            </button>
+            <button class="quick-action-btn" data-action="bookmarks" title="${t('bookmarks')}">
+                🔖
+            </button>
+            <button class="quick-action-btn" data-action="filter" title="${t('filterMessages')}">
+                👤
+            </button>
+            <button class="quick-action-btn" data-action="stats" title="${t('statistics')}">
+                📊
+            </button>
+            <button class="quick-action-btn" data-action="theme" title="${t('theme_key')}">
+                ${currentTheme === 'light' ? '🌙' : '☀️'}
+            </button>
+            <button class="quick-action-btn" data-action="scroll-top" title="${currentLang === 'en' ? 'Scroll to top' : currentLang === 'ru' ? 'Наверх' : 'Вгору'}">
+                ⬆️
+            </button>
+        `;
+        document.body.appendChild(toolbar);
+        
+        // Show toolbar on scroll
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            toolbar.classList.add('visible');
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                toolbar.classList.remove('visible');
+            }, 2000);
+        });
+        
+        // Action handlers
+        toolbar.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const action = btn.dataset.action;
+                
+                switch(action) {
+                    case 'jump':
+                        showJumpToMessage();
+                        break;
+                    case 'bookmarks':
+                        document.getElementById('bookmarks-panel')?.classList.toggle('visible');
+                        break;
+                    case 'filter':
+                        document.getElementById('user-filter')?.classList.toggle('visible');
+                        break;
+                    case 'stats':
+                        showDetailedStats();
+                        break;
+                    case 'theme':
+                        document.getElementById('theme-toggle')?.click();
+                        setTimeout(() => {
+                            btn.innerHTML = currentTheme === 'light' ? '🌙' : '☀️';
+                        }, 100);
+                        break;
+                    case 'scroll-top':
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        break;
+                }
+            });
+        });
+    }
+
+    // Jump to message by number
+    function showJumpToMessage() {
+        let modal = document.getElementById('jump-modal');
+        
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'jump-modal';
+            modal.innerHTML = `
+                <div class="jump-content">
+                    <h3>${t('jumpToMessage')}</h3>
+                    <input type="number" id="jump-input" placeholder="${t('jumpPlaceholder')}" min="1">
+                    <div class="jump-buttons">
+                        <button class="jump-cancel">${t('cancel')}</button>
+                        <button class="jump-go">${t('jumpGo')}</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Close on overlay click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('visible');
+                }
+            });
+            
+            // Cancel button
+            modal.querySelector('.jump-cancel').addEventListener('click', () => {
+                modal.classList.remove('visible');
+            });
+            
+            // Go button
+            modal.querySelector('.jump-go').addEventListener('click', () => {
+                const input = document.getElementById('jump-input');
+                const messageNum = parseInt(input.value);
+                
+                if (messageNum > 0) {
+                    const messages = Array.from(document.querySelectorAll('.message.default'));
+                    const targetMessage = messages[messageNum - 1];
+                    
+                    if (targetMessage) {
+                        targetMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        targetMessage.classList.add('selected');
+                        setTimeout(() => targetMessage.classList.remove('selected'), 2000);
+                        modal.classList.remove('visible');
+                    } else {
+                        showToast(t('messageNotFound'));
+                    }
+                }
+            });
+            
+            // Enter key
+            modal.querySelector('#jump-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    modal.querySelector('.jump-go').click();
+                }
+            });
+        }
+        
+        modal.classList.add('visible');
+        setTimeout(() => {
+            document.getElementById('jump-input').focus();
+        }, 100);
+    }
+
     function init() {
         addStyles();
         applyTheme();
@@ -2316,11 +3539,17 @@
         createContextMenu();
         createDateNavigation();
         createImageViewer();
+        createBookmarksPanel();
+        createReadingProgress();
+        createUserFilter();
+        createScrollTimeline();
+        createQuickActions();
         setupKeyboardShortcuts();
         enhanceInteractivity();
         addReadIndicators();
         addFavoriteStarsToMessages();
         loadFavorites();
+        loadBookmarks();
         lazyLoadImages();
         
         // Restore reading mode
@@ -2422,6 +3651,24 @@
                 showFavorites();
             }
             
+            // B - Toggle bookmarks panel
+            if (e.key === 'b' && !e.ctrlKey && !e.altKey && document.activeElement.tagName !== 'INPUT') {
+                e.preventDefault();
+                document.getElementById('bookmarks-panel')?.classList.toggle('visible');
+            }
+            
+            // U - Toggle user filter
+            if (e.key === 'u' && !e.ctrlKey && !e.altKey && document.activeElement.tagName !== 'INPUT') {
+                e.preventDefault();
+                document.getElementById('user-filter')?.classList.toggle('visible');
+            }
+            
+            // J - Jump to message
+            if (e.key === 'j' && !e.ctrlKey && !e.altKey && document.activeElement.tagName !== 'INPUT') {
+                e.preventDefault();
+                showJumpToMessage();
+            }
+            
             // Home - Scroll to top
             if (e.key === 'Home') {
                 e.preventDefault();
@@ -2436,12 +3683,18 @@
                 currentDateIndex = dates.length - 1;
             }
             
-            // Escape - Close overlays
+            // Escape - Close overlays and focus mode
             if (e.key === 'Escape') {
-                document.querySelector('#search-container.visible')?.classList.remove('visible');
-                document.querySelector('#image-viewer.active')?.classList.remove('active');
-                document.querySelector('#date-list:not(.hidden)')?.classList.add('hidden');
-                document.querySelector('#keyboard-help.visible')?.classList.remove('visible');
+                if (focusedMessage) {
+                    disableFocusMode();
+                } else {
+                    document.querySelector('#search-container.visible')?.classList.remove('visible');
+                    document.querySelector('#image-viewer.active')?.classList.remove('active');
+                    document.querySelector('#date-list:not(.hidden)')?.classList.add('hidden');
+                    document.querySelector('#keyboard-help.visible')?.classList.remove('visible');
+                    document.querySelector('#bookmarks-panel.visible')?.classList.remove('visible');
+                    document.querySelector('#user-filter.visible')?.classList.remove('visible');
+                }
             }
         });
     }
@@ -2584,6 +3837,10 @@
                             <div class="help-item"><kbd>N</kbd> / <kbd>P</kbd> — ${t('nav_key')}</div>
                             <div class="help-item"><kbd>S</kbd> — ${t('stats_key')}</div>
                             <div class="help-item"><kbd>F</kbd> — ${currentLang === 'en' ? 'Show favorites' : currentLang === 'ru' ? 'Показать избранное' : 'Показати обране'}</div>
+                            <div class="help-item"><kbd>B</kbd> — ${t('bookmarks')}</div>
+                            <div class="help-item"><kbd>U</kbd> — ${t('filterMessages')}</div>
+                            <div class="help-item"><kbd>J</kbd> — ${t('jumpTo')}</div>
+                            <div class="help-item"><kbd>Right click</kbd> — ${currentLang === 'en' ? 'Context menu (focus mode)' : currentLang === 'ru' ? 'Контекстное меню (режим фокуса)' : 'Контекстне меню (режим фокусу)'}</div>
                             <div class="help-item"><kbd>Home</kbd> / <kbd>End</kbd> — ${t('nav_arrows')}</div>
                             <div class="help-item"><kbd>Esc</kbd> — ${t('close_key')}</div>
                         </div>
@@ -2665,6 +3922,126 @@
         }, 5000);
     }
 
+    // iOS-style focus mode
+    let focusedMessage = null;
+    let focusOverlay = null;
+    let focusHint = null;
+    let longPressTimer = null;
+
+    function enableFocusMode(message) {
+        if (focusedMessage === message) return;
+        
+        disableFocusMode();
+        
+        // Create overlay
+        focusOverlay = document.createElement('div');
+        focusOverlay.className = 'focus-overlay';
+        document.body.appendChild(focusOverlay);
+        
+        // Create hint
+        focusHint = document.createElement('div');
+        focusHint.className = 'focus-hint';
+        focusHint.textContent = t('exitFocus');
+        document.body.appendChild(focusHint);
+        
+        // Create action buttons
+        const actions = document.createElement('div');
+        actions.className = 'focus-actions';
+        const isBookmarked = message.classList.contains('bookmarked');
+        actions.innerHTML = `
+            <button data-action="copy">${t('copyText')}</button>
+            <button data-action="bookmark">${isBookmarked ? t('removeBookmark') : t('bookmark')}</button>
+            <button data-action="favorite">${message.classList.contains('favorite-message') ? t('unfavorite') : t('favorite')}</button>
+        `;
+        message.appendChild(actions);
+        
+        // Add event listeners to action buttons
+        actions.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleFocusAction(btn.dataset.action, message);
+            });
+        });
+        
+        // Apply focus
+        setTimeout(() => {
+            focusOverlay.classList.add('visible');
+            focusHint.classList.add('visible');
+            message.classList.add('message-focused');
+            document.body.classList.add('focus-mode-active');
+            focusedMessage = message;
+            
+            // Scroll message into view
+            message.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            showToast(t('focusActive'));
+        }, 50);
+        
+        // Click overlay to exit
+        focusOverlay.addEventListener('click', disableFocusMode);
+    }
+
+    function disableFocusMode() {
+        if (!focusedMessage) return;
+        
+        focusedMessage.classList.remove('message-focused');
+        document.body.classList.remove('focus-mode-active');
+        
+        // Remove action buttons
+        const actions = focusedMessage.querySelector('.focus-actions');
+        if (actions) actions.remove();
+        
+        if (focusOverlay) {
+            focusOverlay.classList.remove('visible');
+            setTimeout(() => {
+                if (focusOverlay && focusOverlay.parentNode) {
+                    focusOverlay.remove();
+                }
+                focusOverlay = null;
+            }, 300);
+        }
+        
+        if (focusHint) {
+            focusHint.classList.remove('visible');
+            setTimeout(() => {
+                if (focusHint && focusHint.parentNode) {
+                    focusHint.remove();
+                }
+                focusHint = null;
+            }, 300);
+        }
+        
+        focusedMessage = null;
+    }
+
+    function handleFocusAction(action, message) {
+        switch(action) {
+            case 'copy':
+                copyMessageText(message);
+                break;
+            case 'bookmark':
+                toggleBookmark(message);
+                disableFocusMode();
+                break;
+            case 'favorite':
+                toggleFavorite(message);
+                disableFocusMode();
+                break;
+        }
+    }
+
+    function copyMessageText(message) {
+        const textElement = message.querySelector('.text');
+        if (textElement) {
+            const text = textElement.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(t('textCopied'));
+            }).catch(() => {
+                showToast('❌ ' + (currentLang === 'en' ? 'Copy failed' : currentLang === 'ru' ? 'Ошибка копирования' : 'Помилка копіювання'));
+            });
+        }
+    }
+
     // Add interactive features
     function enhanceInteractivity() {
         // Spoiler reveal
@@ -2687,10 +4064,12 @@
             }, 500);
         }
 
-        // Click on message to highlight
+        // Click on message to highlight (only if not in focus mode)
         document.querySelectorAll('.message.default').forEach(msg => {
             msg.addEventListener('click', function(e) {
                 if (e.target.tagName === 'A' || e.target.closest('a')) return;
+                if (e.target.closest('.focus-actions')) return;
+                if (focusedMessage) return; // Don't interfere with focus mode
                 
                 document.querySelectorAll('.message.selected').forEach(m => 
                     m.classList.remove('selected')
